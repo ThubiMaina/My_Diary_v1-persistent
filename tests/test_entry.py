@@ -45,6 +45,14 @@ class EntryTestCase(unittest.TestCase):
             data=json.dumps(user_data),
             content_type="application/json")
 
+    def login_user(self, email="erick@gmail.com", password="password"):
+        """ login method"""
+        data = {"email": email, "Password": password}
+        return self.app.post(
+            '/api/auth/login',
+            data=json.dumps(data),
+            content_type="application/json")
+
 
 if __name__ == "__main__":
     unittest.main()
