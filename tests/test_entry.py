@@ -74,11 +74,24 @@ class EntryTestCase(unittest.TestCase):
         Test the creation of a diary entry through the API via 
         POST without owner field
         """
-        result = self.client().post('/api/bucketlists/', 
+        result = self.app.post('/api/v1/entries/', 
             headers=self.headers, data={       
                     "owner": "",
                     "title": "A day in space"
-                                        })
+                                        },content_type="application/json")
         self.assertEqual(result.status_code, 403)
+
+    def test_create_entry_without_title(self):
+        """
+        Test the creation of a diary entry through the API via 
+        POST without the title 
+        """
+        result = self.app.post('/api/v1/entries/', 
+             data={       
+                    "owner": "erick",
+                    "title": ""
+                                        },content_type="application/json")
+        self.assertEqual(result.status_code, 403)
+
 if __name__ == "__main__":
     unittest.main()
