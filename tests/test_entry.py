@@ -105,5 +105,14 @@ class EntryTestCase(unittest.TestCase):
         self.assertEqual(results.status_code, 200)
         self.assertIn('A day in space', result.data.decode('utf-8'))
 
+    def test_get_entries_by_id(self):
+        """Test API to get  user entries by the id (GET request)."""
+        result = self.app.post('/api/v1/user/entries/',
+                                    content_type="application/json",
+                                    data=self.entry_data)
+        self.assertEqual(result.status_code, 201)
+        result = self.app.get('/api/v1/user/entries/1/',
+                                    content_type="application/json",)
+        self.assertEqual(result.status_code, 200)
 if __name__ == "__main__":
     unittest.main()
