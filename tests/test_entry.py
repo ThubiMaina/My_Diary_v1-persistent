@@ -52,7 +52,7 @@ class EntryTestCase(unittest.TestCase):
             '/api/auth/login',
             data=json.dumps(data),
             content_type="application/json")
-        
+
     def create_entry(self, owner="erick", title="a good day in space"):
         """This helper method helps register a test user."""
         diary_data = {'owner': owner, 'title': title}
@@ -61,5 +61,24 @@ class EntryTestCase(unittest.TestCase):
                 content_type="application/json",
                 data=json.dumps(diary_data))
 
+    def test_diary_entry_creation(self):
+        """
+        Test a diary entry creation 
+        """
+        result = self.app.post("/api/v1/entries/", data=self.entry_data,
+                                    content_type="application/json")
+        self.assertEqual(result.status_code, 201)
+
+    def test_create_entry_without_owner(self):
+        """
+        Test the creation of a diary entry through the API via 
+        POST without owner field
+        """
+        result = self.client().post('/api/bucketlists/', 
+            headers=self.headers, data={       
+                    "owner": "",
+                    "title": "A day in space"
+                                        })
+        self.assertEqual(result.status_code, 403)
 if __name__ == "__main__":
     unittest.main()
