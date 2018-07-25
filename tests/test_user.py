@@ -102,6 +102,18 @@ class AuthTestCase(unittest.TestCase):
         result = self.app.post("/api/auth/register/" ,data = test_data,
                             content_type = "application/json")
         self.assertEqual(result.status_code, 403)
- 
+
+    def test_registration_with_a_short_password(self):
+        """test that the email supplied by the user is valid
+        """
+        test_data = json.dumps(dict({
+            "username":"erick",
+            "email": "erick@emailcom",
+            "password":"pass"
+            }))
+        result = self.app.post("/api/auth/register/" ,data = test_data,
+                            content_type = "application/json")
+        self.assertEqual(result.status_code, 403)
+
 if __name__ == "__main__":
     unittest.main()
