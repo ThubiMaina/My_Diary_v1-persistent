@@ -38,6 +38,19 @@ class AuthTestCase(unittest.TestCase):
                                     content_type="application/json")
         self.assertEqual(result.status_code, 201)
 
+    def test_registration_without_username(self):
+        """
+        Test that empty user name  cannot register
+        """
+        test_data = json.dumps(dict({
+            "username": "",
+            "email": "erick@gmail.com",
+            "password": "password"
+        }))
+        result = self.app.post("/api/auth/register/", data = test_data,
+                                    content_type="application/json")
+        self.assertEqual(result.status_code, 400)
+
     
 if __name__ == "__main__":
     unittest.main()
