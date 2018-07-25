@@ -167,5 +167,18 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual(result['error'], "Invalid email or password")
         self.assertEqual(login_res.status_code, 401)
 
+    def test_login_blank_email(self):
+        """Test registered user can login with a blank email."""
+        result = self.app.post("/api/auth/register/", data=self.register_data,
+                                    content_type="application/json")
+        self.assertEqual(result.status_code, 201)
+        login_res = self.app.post("/api/auth/login/",
+            data={"email":'',
+                'password':'password'},
+                                          content_type="application/json")
+        results = json.loads(login_res.data.decode())
+        self.assertEqual(result['error'], "email field cannot be blank")
+        self.assertEqual(login_res.status_code, 400)
+
 if __name__ == "__main__":
     unittest.main()
