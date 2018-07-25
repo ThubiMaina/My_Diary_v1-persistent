@@ -194,6 +194,19 @@ class AuthTestCase(unittest.TestCase):
                                     content_type="application/json")
         self.assertEqual(result.status_code, 401)
 
+    def test_login_with_blank_password(self):
+        """Test registered user can login with a blank password."""
+        result = self.app.post("/api/auth/register/", data=self.register_data,
+                                    content_type="application/json")
+        self.assertEqual(result.status_code, 201)
+        login_res = self.app.post("/api/auth/login/",
+            data={"email":'erick@gmail.com',
+                'password':''},
+                                          content_type="application/json")
+        results = json.loads(login_res.data.decode())
+        self.assertEqual(result['error'], "password needed to login")
+        self.assertEqual(login_res.status_code, 400)
+        
     def test_login_with_a_nonexistent_url(self):
         """
         Test login with invalid url
