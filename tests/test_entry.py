@@ -74,11 +74,12 @@ class EntryTestCase(unittest.TestCase):
         Test the creation of a diary entry through the API via 
         POST without owner field
         """
-        result = self.app.post('/api/v1/entries/', 
-            headers=self.headers, data={       
+        result = self.app.post('/api/v1/user/entries/', 
+                    data={       
                     "owner": "",
                     "title": "A day in space"
-                                        },content_type="application/json")
+                                        },
+                    content_type="application/json")
         self.assertEqual(result.status_code, 403)
 
     def test_create_entry_without_title(self):
@@ -86,12 +87,23 @@ class EntryTestCase(unittest.TestCase):
         Test the creation of a diary entry through the API via 
         POST without the title 
         """
-        result = self.app.post('/api/v1/entries/', 
+        result = self.app.post('/api/v1/user/entries/', 
              data={       
                     "owner": "erick",
                     "title": ""
                                         },content_type="application/json")
         self.assertEqual(result.status_code, 403)
+
+    def test_get_all_entries(self):
+        """Test API to get  diary entries (GET request)."""
+        result = self.app.post('/api/v1/user/entries/',
+                                    content_type="application/json",
+                                    data=self.entry_data)
+        self.assertEqual(result.status_code, 201)
+        results = self.app.get('/api/v1/user/entries/', 
+            content_type="application/json")
+        self.assertEqual(results.status_code, 200)
+        self.assertIn('A day in space', result.data.decode('utf-8'))
 
 if __name__ == "__main__":
     unittest.main()
