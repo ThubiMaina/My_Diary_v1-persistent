@@ -194,5 +194,12 @@ class AuthTestCase(unittest.TestCase):
                                     content_type="application/json")
         self.assertEqual(result.status_code, 401)
 
+    def test_login_with_a_nonexistent_url(self):
+        """
+        Test login with invalid url
+        """
+        response = self.app.post('/api/auth/logon/', data=self.login_data)
+        self.assertEqual(response.status_code, 404)
+
 if __name__ == "__main__":
     unittest.main()
