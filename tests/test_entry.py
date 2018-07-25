@@ -128,6 +128,14 @@ class EntryTestCase(unittest.TestCase):
                                     content_type="application/json",)
         self.assertEqual(result.status_code, 200)
 
-
+    def test_get_entry_invalid_id(self):
+        """Test API to get a non existing diary entry """
+        result = self.app.post('/api/v1/user/entries/',
+                                    content_type="application/json",
+                                    data=self.entry_data)
+        self.assertEqual(result.status_code, 201)
+        result = self.app.get('/api/v1/user/entries/4/',
+                                     content_type="application/json")
+        self.assertEqual(result.status_code, 404)
 if __name__ == "__main__":
     unittest.main()
