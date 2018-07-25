@@ -33,7 +33,18 @@ class EntryTestCase(unittest.TestCase):
             "password":"password"
             }))
 
-    
+    def register_user(self, username="erick", email="erick@gmail.com", password="password"):
+        """register method to be called in tests"""
+        user_data = {
+            "username": username,
+            "email": email,
+            "Password": password
+        }
+        return self.app.post(
+            '/api/auth/register',
+            data=json.dumps(user_data),
+            content_type="application/json")
+
 
 if __name__ == "__main__":
     unittest.main()
