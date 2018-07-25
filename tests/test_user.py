@@ -79,5 +79,17 @@ class AuthTestCase(unittest.TestCase):
 
         self.assertEqual(result.status_code, 400)
 
+    def test_registration_with_special_characters(self):
+        """test that user name cannot contain special characters eg @#
+        """
+        test_data = json.dumps(dict({
+            "username":"@erick",
+            "email": "erick@email.com",
+            "password":"password"
+            }))
+        result = self.app.post("/api/auth/register/" ,data = test_data,
+                            content_type = "application/json")
+        self.assertEqual(result.status_code, 403)
+
 if __name__ == "__main__":
     unittest.main()
