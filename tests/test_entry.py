@@ -137,5 +137,24 @@ class EntryTestCase(unittest.TestCase):
         result = self.app.get('/api/v1/user/entries/4/',
                                      content_type="application/json")
         self.assertEqual(result.status_code, 404)
+
+    def test_api_update_entry_with_id(self):
+        """Test API url [PUT] api/user/entries"""
+
+        #create entries
+        response = self.app.post(
+            'api/v1/user/entries/',
+            data= self.entry_data,
+            content_type="application/json")
+        self.assertEqual(response.status_code, 201)
+        #update entries
+        response = self.app.put(
+            'api/v1/user/entries/1/',
+            data=json.dumps({
+                "owner": "erick",
+                "Content": "A day and a walk in the park"
+            },content_type="application/json"))
+        self.assertEqual(response.status_code, 201)
+
 if __name__ == "__main__":
     unittest.main()
