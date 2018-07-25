@@ -122,5 +122,19 @@ class AuthTestCase(unittest.TestCase):
         result = self.app.post('/api/auth/regist/', data=self.register_data)
         self.assertEqual(result.status_code, 404)
 
+    def test_already_registered_user(self):
+        """
+        Test that one cannot register twice
+        """
+        result = self.app.post("/api/auth/register/", data=self.register_data,
+                                    content_type="application/json")
+        self.assertEqual(result.status_code, 201)
+
+        # Test double registration
+        second_result = self.app.post("/api/auth/register/",
+                                           data=self.register_data,
+                                           content_type="application/json")
+        self.assertEqual(second_result.status_code, 409)
+        
 if __name__ == "__main__":
     unittest.main()
