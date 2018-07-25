@@ -52,7 +52,14 @@ class EntryTestCase(unittest.TestCase):
             '/api/auth/login',
             data=json.dumps(data),
             content_type="application/json")
-
+        
+    def create_entry(self, owner="erick", title="a good day in space"):
+        """This helper method helps register a test user."""
+        diary_data = {'owner': owner, 'title': title}
+        return self.app.post(
+                '/api/v1/entries/',
+                content_type="application/json",
+                data=json.dumps(diary_data))
 
 if __name__ == "__main__":
     unittest.main()
