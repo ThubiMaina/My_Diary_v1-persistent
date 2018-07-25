@@ -143,27 +143,47 @@ class EntryTestCase(unittest.TestCase):
 
         #create entries
         response = self.app.post(
-            'api/v1/user/entries/',
+            '/api/v1/user/entries/',
             data= self.entry_data,
             content_type="application/json")
         self.assertEqual(response.status_code, 201)
         #update entries
         response = self.app.put(
-            'api/v1/user/entries/1/',
+            '/api/v1/user/entries/1/',
             data=json.dumps({
                 "owner": "erick",
-                "Content": "A day and a walk in the park"
+                "title": "A day and a walk in the park"
             },content_type="application/json"))
         self.assertEqual(response.status_code, 201)
 
     def test_edit_a_non_existing_entry(self):
         """Test API to edit a non existing entry """
+        result = self.app.post('/api/v1/user/entries/', 
+                                content_type="application/json", 
+                                data=self.entry_data)
+        self.assertEqual(result.status_code, 201)
+        result = self.app.put('/api/v1/user/entries/33/',
+                            data=json.dumps({
+                            "owner": "erick",
+                            "title": "A day and a walk in the park"
+            },content_type="application/json")
+                                content_type="application/json")
+        self.assertEqual(result.status_code, 404)
+
+    def test_delete_entry(self):
+        """Test API to delete a diary entry by user (DELETE request)"""
         result = self.app.post('api/v1/user/entries/', 
                                 content_type="application/json", 
                                 data=self.entry_data)
         self.assertEqual(result.status_code, 201)
-        result = self.app.put('api/v1/user/entries/33/', content_type="application/json")
+        #delete entry
+        res = self.app.delete('api/v1/user/entries/1/', 
+                                content_type="application/json")
+        self.assertEqual(res.status_code, 200)
+        #test get after delete
+        result = self.app.get('api/v1/user/entries/1/', 
+                                    content_type="application/json")
         self.assertEqual(result.status_code, 404)
-
+        
 if __name__ == "__main__":
     unittest.main()
