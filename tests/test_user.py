@@ -180,5 +180,19 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual(result['error'], "email field cannot be blank")
         self.assertEqual(login_res.status_code, 400)
 
+    def test_login_non_registered_user(self):
+        """
+        Test that non registered users cannot log in
+        """
+        unregistered = json.dumps(dict({
+            "username": "newuser",
+            "email": "newuser@email.com",
+            "password": "newpassword"
+        }))
+
+        result = self.app.post("/api/auth/login/", data=unregistered,
+                                    content_type="application/json")
+        self.assertEqual(result.status_code, 401)
+
 if __name__ == "__main__":
     unittest.main()
