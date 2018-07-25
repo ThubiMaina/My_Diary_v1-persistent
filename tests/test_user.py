@@ -135,6 +135,24 @@ class AuthTestCase(unittest.TestCase):
                                            data=self.register_data,
                                            content_type="application/json")
         self.assertEqual(second_result.status_code, 409)
-        
+
+    def test_login(self):
+        """
+        Test that a user can login successfully
+        """
+        result = self.app.post("/api/auth/register/", data=self.register_data,
+                                    content_type="application/json")
+        self.assertEqual(result.status_code, 201)
+
+        login_res = self.app.post("/api/auth/login/", data=self.login_data,
+                                          content_type="application/json")
+        results = json.loads(login_res.data.decode())
+
+        # Confirm the success message
+        self.assertEqual(results["message"], "You logged in successfully.")
+        # Confirm the status code and access token
+        self.assertEqual(login_res.status_code, 200)
+        self.assertTrue(results["access_token"])
+
 if __name__ == "__main__":
     unittest.main()
