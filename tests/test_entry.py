@@ -156,5 +156,14 @@ class EntryTestCase(unittest.TestCase):
             },content_type="application/json"))
         self.assertEqual(response.status_code, 201)
 
+    def test_edit_a_non_existing_entry(self):
+        """Test API to edit a non existing entry """
+        result = self.app.post('api/v1/user/entries/', 
+                                content_type="application/json", 
+                                data=self.entry_data)
+        self.assertEqual(result.status_code, 201)
+        result = self.app.put('api/v1/user/entries/33/', content_type="application/json")
+        self.assertEqual(result.status_code, 404)
+
 if __name__ == "__main__":
     unittest.main()
