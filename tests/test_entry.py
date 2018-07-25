@@ -69,6 +69,19 @@ class EntryTestCase(unittest.TestCase):
                                     content_type="application/json")
         self.assertEqual(result.status_code, 201)
 
+    def test_bad_request_post_entries(self):
+        """Test bad request on post method"""
+        self.register_user()
+        login = self.login_user()
+        #entries
+        empty_data = self.app.post(
+            'api/v1/user/entries',
+            data={},
+            content_type="application/json",
+                )
+        self.assertEqual(empty_data.status_code, 400)
+
+
     def test_create_entry_without_owner(self):
         """
         Test the creation of a diary entry through the API via 
@@ -114,5 +127,7 @@ class EntryTestCase(unittest.TestCase):
         result = self.app.get('/api/v1/user/entries/1/',
                                     content_type="application/json",)
         self.assertEqual(result.status_code, 200)
+
+
 if __name__ == "__main__":
     unittest.main()
