@@ -166,8 +166,7 @@ class EntryTestCase(unittest.TestCase):
                             data=json.dumps({
                             "owner": "erick",
                             "title": "A day and a walk in the park"
-            },content_type="application/json")
-                                content_type="application/json")
+            },content_type="application/json"))
         self.assertEqual(result.status_code, 404)
 
     def test_delete_entry(self):
@@ -183,6 +182,16 @@ class EntryTestCase(unittest.TestCase):
         #test get after delete
         result = self.app.get('api/v1/user/entries/1/', 
                                     content_type="application/json")
+        self.assertEqual(result.status_code, 404)
+
+    def test_delete_entry_with_invalid_id(self):
+        """Test delete if id does not exist """
+        result = self.app.post('api/v1/user/entries/', 
+                                        content_type="application/json", 
+                                        data=self.entry_data)
+        self.assertEqual(result.status_code, 201)
+        result = self.app.delete('api/v1/user/entries/33/', 
+                                        content_type="application/json")
         self.assertEqual(result.status_code, 404)
         
 if __name__ == "__main__":
