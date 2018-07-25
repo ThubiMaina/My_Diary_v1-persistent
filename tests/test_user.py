@@ -32,6 +32,12 @@ class AuthTestCase(unittest.TestCase):
             "password":"password"
             }))
 
+    def test_registration(self):
+        """Test user registration works correcty."""
+        result = self.app.post("/api/auth/register/", data = self.register_data,
+                                    content_type="application/json")
+        self.assertEqual(result.status_code, 201)
+
     
 if __name__ == "__main__":
     unittest.main()
