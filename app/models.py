@@ -77,4 +77,34 @@ class DiaryEntries:
         self.title = title
         self.date = datetime.utcnow()
 
-    
+    def save_entry(self):
+        """ insert a new user into the users table """
+        sql = """INSERT INTO diary_entries(user_id, title )
+                 VALUES(%s, %s) RETURNING diary_id;"""
+        conn = None
+        diary_id = None
+        
+
+        try:
+            # read database configuration
+            params = config()
+            # connect to the PostgreSQL database
+            conn = psycopg2.connect(**params)
+            # create a new cursor
+            cur = conn.cursor()
+            # execute the INSERT statement
+            cur.execute(sql, (self.user_id, self.title))
+            # get the generated id back
+            self.diary_id = cur.fetchone()[0]
+            # commit the changes to the database
+            conn.commit()
+            # close communication with the database
+            cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("error message", error)
+        finally:
+            if conn is not None:
+                conn.close()
+     
+        return diary_id
+
