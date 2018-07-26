@@ -75,7 +75,7 @@ class EntryTestCase(unittest.TestCase):
         login = self.login_user()
         #entries
         empty_data = self.app.post(
-            'api/v1/user/entries',
+            'api/v1/user/entries/',
             data={},
             content_type="application/json",
                 )
