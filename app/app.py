@@ -105,6 +105,32 @@ def create_app(config_name):
         response = {'error': 'User does not exist. Proceed to register'}
         return jsonify(response), 401
 
-    
+    @app.route('/api/v1/entries/', methods=['POST'])
+    def create_diary_entry():
+        """api endpoint to create a new diary entry"""
+        data = request.get_json()
+        user_id = data.get('user_id')
+        title = data.get('title')
+        if user_id == "":
+            response = jsonify({'error': 'provide entry owner'})
+            response.status_code = 400
+            return response
+
+        if title == "":
+            response = jsonify({'error': 'provide the title for the entry'})
+            response.status_code = 400
+            return response
+
+        Entry = {
+            'date':datetime.utcnow(),
+            'user_id': request.json["user_id"],
+            'title': request.json.get('title')}
+
+        diary_entry = DiaryEntries(**Entry)
+        diary_entry.save_entry()
+        response = jsonify({"message": "entry created"})
+        response.status_code = 201
+        return response
+
 
     return app
