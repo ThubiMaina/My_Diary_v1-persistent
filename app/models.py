@@ -70,3 +70,11 @@ class User:
 
     
 
+class DiaryEntries:
+    """docstring for DiaryEntries"""
+    def __init__(self, user_id, title, date):
+        self.user_id = user_id
+        self.title = title
+        self.date = datetime.utcnow()
+
+    
