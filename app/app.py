@@ -132,5 +132,19 @@ def create_app(config_name):
         response.status_code = 201
         return response
 
+    @app.route('/api/v1/entries/', methods=['GET'])
+    @auth_token
+    def get_entries(current_user_email):
+        """api endpoint to get a list of diary entries"""
+        DiaryList = []
+        entries = fetch_entries()
+        for diary_entry in entries:
+            print(entries)
+            DiaryList.append({'date': datetime.utcnow(),
+                              'owner': diary_entry[2],
+                              'entry_id': diary_entry[0],
+                              'title': diary_entry[1]
+                             })
+        return jsonify(DiaryList), 200
 
     return app
