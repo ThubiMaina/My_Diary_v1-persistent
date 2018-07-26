@@ -108,3 +108,28 @@ class DiaryEntries:
      
         return diary_id
 
+def fetch_entries(user_id = None):
+    """ query parts from the parts table """
+    conn = None
+
+
+    try:
+        params = config()
+        conn = psycopg2.connect(**params)
+        cur = conn.cursor()
+        if user_id is not None:
+            cur.execute("SELECT * FROM diary_entries where user_id = " + str(user_id))
+        else:
+            cur.execute("SELECT * FROM diary_entries")
+        rows = cur.fetchall()
+        print("The number of entries: ", cur.rowcount)
+        for row in rows:
+            print(row)
+        cur.close()
+        return rows
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
