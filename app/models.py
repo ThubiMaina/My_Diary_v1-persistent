@@ -38,4 +38,35 @@ class User:
         except jwt.InvalidTokenError:
             return {"error":"Invalid token. Please register or login"}
 
+    def save(self):
+        """ insert a new user into the users table """
+        sql = """INSERT INTO users(user_name, password, email)
+                 VALUES(%s, %s, %s) RETURNING user_id;"""
+        conn = None
+        user_id = None
+        try:
+            # read database configuration
+            params = config()
+            # connect to the PostgreSQL database
+            conn = psycopg2.connect(**params)
+            # create a new cursor
+            cur = conn.cursor()
+            # execute the INSERT statement
+            cur.execute(sql, (self.username, self.password, self.email))
+            # get the generated id back
+            self.user_id = cur.fetchone()[0]
+            # commit the changes to the database
+            conn.commit()
+            # close communication with the database
+            cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("error", error)
+        finally:
+            if conn is not None:
+                conn.close()
+     
+        return user_id
+
+
     
+
