@@ -43,6 +43,8 @@ Run the command `$ pip install -r requirements.txt` to install necessary librari
 
 ### Run 
 
+Run ` db\db_001.py ` to create tables 
+
 To test our project on your terminal run 
 
 * ```set FLASK_APP=run.py``` on windows
