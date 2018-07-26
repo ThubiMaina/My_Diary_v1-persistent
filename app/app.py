@@ -71,6 +71,40 @@ def create_app(config_name):
             response.status_code = 201
             return response
 
+    @app.route('/api/auth/login/', methods=['POST'])
+    def login():
+        """login api endpoint"""
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+        if email == "":
+            response = jsonify({'error': 'email field cannot be blank'})
+            response.status_code = 400
+            return response
+        if password == "":
+            response = jsonify({'error': 'password field has to be filled'})
+            response.status_code = 400
+            return response
+
+        user = get_user(email=email)
+        if user is None:
+            response = jsonify({'error': 'User does not exit, Register'})
+            response.status_code = 400
+            return response
+
+        if user.password== password:
+            access_token = User.generate_token(email)
+            if access_token:
+                response = {
+                    'message': 'Login successful',
+                    'access_token': access_token
+                }
+                return jsonify(response), 200
+            response = {'error': 'Invalid email or password'}
+            return jsonify(response), 401       
+        response = {'error': 'User does not exist. Proceed to register'}
+        return jsonify(response), 401
+
     
 
     return app
