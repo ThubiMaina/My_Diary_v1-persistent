@@ -133,3 +133,29 @@ def fetch_entries(user_id = None):
         if conn is not None:
             conn.close()
 
+def get_user(email):
+    """ query parts from the parts table """
+    conn = None
+
+    try:
+        params = config()
+        conn = psycopg2.connect(**params)
+        cur = conn.cursor()
+        cur.execute(" SELECT * FROM users where email = '" + email+ "'")
+        rows = cur.fetchall()
+        print("rows", rows)
+        user = None
+        if(len(rows)> 0):
+
+            row = rows[0]
+            user = User( username=row[1], email=row[2], password=row[3])
+    
+        
+        cur.close()
+        
+        return user
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
