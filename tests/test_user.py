@@ -149,7 +149,7 @@ class AuthTestCase(unittest.TestCase):
         results = json.loads(login_res.data.decode())
 
         # Confirm the success message
-        self.assertEqual(results["message"], "You logged in successfully.")
+        self.assertEqual(results["message"], "welcome you now can log in.")
         # Confirm the status code and access token
         self.assertEqual(login_res.status_code, 200)
         self.assertTrue(results["access_token"])
@@ -178,7 +178,7 @@ class AuthTestCase(unittest.TestCase):
                                           content_type="application/json")
         results = json.loads(login_res.data.decode())
         self.assertEqual(result['error'], "email field cannot be blank")
-        self.assertEqual(login_res.status_code, 400)
+        self.assertEqual(login_res.status_code, 401)
 
     def test_login_non_registered_user(self):
         """
