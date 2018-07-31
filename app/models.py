@@ -14,6 +14,9 @@ class User:
 
     @staticmethod
     def generate_token(email):
+        """
+        define method to generate token
+        """
         try:
             payload = {
             'iss': "mydiary",
@@ -67,23 +70,19 @@ class User:
      
         return user_id
 
-
-    
-
 class DiaryEntries:
     """docstring for DiaryEntries"""
-    def __init__(self, user_id, title, date):
-        self.user_id = user_id
+    def __init__(self, owner, title ,content):
+        self.owner = owner
         self.title = title
-        self.date = datetime.utcnow()
+        self.content = content
 
     def save_entry(self):
         """ insert a new user into the users table """
-        sql = """INSERT INTO diary_entries(user_id, title )
-                 VALUES(%s, %s) RETURNING diary_id;"""
+        sql = """INSERT INTO diary_entries(owner, title, content )
+                 VALUES(%s, %s, %s) RETURNING diary_id;"""
         conn = None
         diary_id = None
-        
 
         try:
             # read database configuration
@@ -93,7 +92,7 @@ class DiaryEntries:
             # create a new cursor
             cur = conn.cursor()
             # execute the INSERT statement
-            cur.execute(sql, (self.user_id, self.title))
+            cur.execute(sql, (self.owner, self.title, self.content))
             # get the generated id back
             self.diary_id = cur.fetchone()[0]
             # commit the changes to the database
@@ -108,23 +107,49 @@ class DiaryEntries:
      
         return diary_id
 
-def fetch_entries(user_id = None):
-    """ query parts from the parts table """
-    conn = None
+    
 
+    def delete_entry(self):
+        """ delete an entry by  using the entry_id """
+        conn = None
+
+        rows_deleted = 0
+        try:
+            # read database configuration
+            params = config()
+            # connect to the PostgreSQL database
+            conn = psycopg2.connect(**params)
+            # create a new cursor
+            cur = conn.cursor()
+            # execute the UPDATE  statement
+            cur.execute("DELETE FROM diary_entries WHERE diary_id = %s", (self.entry_id,))
+            # get the number of updated rows
+            rows_deleted = cur.rowcount
+            # Commit the changes to the database
+            conn.commit()
+            # Close communication with the PostgreSQL database
+            cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
+     
+        return rows_deleted
+
+def fetch_entries(current_user_email):
+    """ query entries from the diary entries table """
+    conn = None
 
     try:
         params = config()
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
-        if user_id is not None:
-            cur.execute("SELECT * FROM diary_entries where user_id = " + str(user_id))
-        else:
-            cur.execute("SELECT * FROM diary_entries")
+        query = "SELECT * FROM diary_entries where owner = " + ('%s')
+        data = str(current_user_email)
+        cur.execute(query, [data])
+        
         rows = cur.fetchall()
-        print("The number of entries: ", cur.rowcount)
-        for row in rows:
-            print(row)
         cur.close()
         return rows
     except (Exception, psycopg2.DatabaseError) as error:
@@ -134,7 +159,7 @@ def fetch_entries(user_id = None):
             conn.close()
 
 def get_user(email):
-    """ query parts from the parts table """
+    """ query users from the users table """
     conn = None
 
     try:
@@ -143,14 +168,11 @@ def get_user(email):
         cur = conn.cursor()
         cur.execute(" SELECT * FROM users where email = '" + email+ "'")
         rows = cur.fetchall()
-        print("rows", rows)
         user = None
         if(len(rows)> 0):
 
             row = rows[0]
-            user = User( username=row[1], email=row[2], password=row[3])
-    
-        
+            user = User( username=row[1], email=row[2], password=row[3])   
         cur.close()
         
         return user
@@ -159,3 +181,35 @@ def get_user(email):
     finally:
         if conn is not None:
             conn.close()
+
+
+
+def update_entry( entry_id,title, content):
+        """ update the title of an entry using id """
+        sql = """ UPDATE diary_entries
+                    SET title = ("%s"), content = ('%s')
+                    WHERE diary_id = ('%s')"""
+        conn = None
+        updated_rows = 0
+        try:
+            # read database configuration
+            params = config()
+            # connect to the PostgreSQL database
+            conn = psycopg2.connect(**params)
+            # create a new cursor
+            cur = conn.cursor()
+            # execute the UPDATE  statement
+            cur.execute(sql, (  title, content, entry_id))
+            # get the number of updated rows
+            updated_rows = cur.rowcount
+            # Commit the changes to the database
+            conn.commit()
+            # Close communication with the PostgreSQL database
+            cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
+
+        return updated_rows
