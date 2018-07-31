@@ -18,22 +18,11 @@ def create_tables():
         """ CREATE TABLE diary_entries (
                 diary_id SERIAL PRIMARY KEY,
                 title VARCHAR(255) NOT NULL,
-                user_id INTEGER ,
-                FOREIGN KEY (user_id)
-                REFERENCES users (user_id)
-                ON UPDATE CASCADE ON DELETE CASCADE
+                content VARCHAR(255) NOT NULL,
+                owner VARCHAR(255) NOT NULL
                 )
-        """,
         """
-        CREATE TABLE contents (
-                content_id INTEGER PRIMARY KEY,
-                contents VARCHAR(255) NOT NULL,
-                diary_id INTEGER,
-                FOREIGN KEY (diary_id)
-                REFERENCES diary_entries (diary_id)
-                ON UPDATE CASCADE ON DELETE CASCADE
         )
-        """)
     conn = None
     try:
         # read the connection parameters
