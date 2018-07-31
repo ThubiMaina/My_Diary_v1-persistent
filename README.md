@@ -36,12 +36,20 @@ $ virtualenv <virtualenv-name>
 ```
 and activate virtual environment
 ```
-$ cd MyDiary\virtualenv-name\Scripts\activate
+$ cd MyDiary\virtualenv-name\Scripts\activate 
 ```
+On windows
+
+``` 
+$ source virtualenv-name/bin/activate
+```
+On a unix environment
 
 Run the command `$ pip install -r requirements.txt` to install necessary libraries.
 
 ### Run 
+
+Run ` db\db_001.py ` to create tables 
 
 To test our project on your terminal run 
 
