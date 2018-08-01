@@ -22,8 +22,8 @@ install:
 
 before_script:
 
-
-  - psql -c 'CREATE DATABASE diary_testing;' -U postgres
+  - export DB_NAME="flask-api"
+  - psql -c 'CREATE DATABASE flask-api;' -U postgres
 
 # start test
 
