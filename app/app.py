@@ -103,15 +103,31 @@ def create_app(config_name):
             response = jsonify({'error': 'email field cannot be blank'})
             response.status_code = 400
             return response
+
+        if email:
+                stripped_mail = email.strip()
+                if len(stripped_mail) == 0:
+                    response = jsonify({'error':
+                    'email field cannot contain spaces'})
+                    response.status_code = 403
+                    return response
         if password == "":
             response = jsonify({'error': 'password field has to be filled'})
             response.status_code = 400
             return response
 
+        if password:
+                stripped_pass = password.strip()
+                if len(stripped_pass) == 0:
+                    response = jsonify({'error':
+                    'please avoid using spaces in your password'})
+                    response.status_code = 403
+                    return response
+
         user = get_user(email=email)
         if user is None:
             response = jsonify({'error': 'User does not exit, Register'})
-            response.status_code = 400
+            response.status_code = 409
             return response
 
         if user.password== password:
@@ -122,10 +138,20 @@ def create_app(config_name):
                     'access_token': access_token
                 }
                 return jsonify(response), 200
-            response = {'error': 'Invalid email or password'}
-            return jsonify(response), 401       
-        response = {'error': 'User does not exist. Proceed to register'}
-        return jsonify(response), 401
+        response = {'error': 'Invalid email or password'}
+        return jsonify(response), 401       
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        response = jsonify({'error': 'not found'})
+        response.status_code = 404
+        return response
+
+    @app.errorhandler(500)
+    def server_error(e):
+        response = jsonify({'error': 'Internal server error'})
+        response.status_code = 500
+        return response
 
     @app.route('/api/v1/entries/', methods=['POST'])
     @auth_token
@@ -135,15 +161,38 @@ def create_app(config_name):
         owner = current_user_email
         title = data.get('title')
         content = data.get('content')
-        if content == "":
-            response = jsonify({'error': 'add content'})
-            response.status_code = 400
-            return response
 
         if title == "":
             response = jsonify({'error': 'provide the title for the entry'})
             response.status_code = 400
             return response
+
+        if title:
+                stripped_title = title.strip()
+                if len(stripped_title) == 0:
+                    response = jsonify({'error':
+                    'title should not start with spaces'})
+                    response.status_code = 403
+                    return response
+
+        if content == "":
+            response = jsonify({'error': 'add content'})
+            response.status_code = 400
+            return response
+
+        
+        if content:
+                stripped_content = content.strip()
+                if len(stripped_content) == 0:
+                    response = jsonify({'error':
+                    'field cannot start with spaces'})
+                    response.status_code = 403
+                    return response
+        # entries = fetch_entries(current_user_email)
+        # entries_user = [entry for entry in entries if entry[3] == owner]
+        # for title in entries_user:
+        #     if title[1] == 'title':
+        #         abort(400)
         Entry = {
             'owner': owner,
             'title': title,
@@ -178,27 +227,16 @@ def create_app(config_name):
     @auth_token
     def get_single_entry(entry_id, current_user_email):
         """api endpoint to get a single diary entry"""
-        one_entry = []
         entries = fetch_entries(current_user_email)
-        user_entries = entries[0]
-        print(user_entries)
 
-        if not user_entries:
+        entries_user = [entry for entry in entries if entry[0] == entry_id]
+
+        if len(entries_user) == 0:
             abort(400)
-
-        if user_entries[0] == entry_id:
-            one_entry.append({
-               'entry_id':user_entries[0],
-               'title':user_entries[1],
-               'content':user_entries[2],
-               'owner':user_entries[3]
-
-                })
-            return jsonify(one_entry), 200
-        else:
-            abort(404, {"message": "not found"})
-
-
+        return jsonify({
+            
+            "entry":entries_user
+            }),200
             
 
     @app.route('/api/v1/entries/<int:entry_id>/', methods=['PUT'])
@@ -208,29 +246,54 @@ def create_app(config_name):
         data = request.get_json()
         title = data.get('title')
         content = data.get('content')
-        entry = fetch_entries(current_user_email)
-        user_entries = entry[0]
-        print(user_entries)
+        if title == "":
+            response = jsonify({'error': 'provide the title for the entry'})
+            response.status_code = 400
+            return response
+
+        if title:
+                stripped_title = title.strip()
+                if len(stripped_title) == 0:
+                    response = jsonify({'error':
+                    'title should not start with spaces'})
+                    response.status_code = 403
+                    return response
+
+        if content == "":
+            response = jsonify({'error': 'add content'})
+            response.status_code = 400
+            return response
+
+        
+        if content:
+                stripped_content = content.strip()
+                if len(stripped_content) == 0:
+                    response = jsonify({'error':
+                    'field cannot start with spaces'})
+                    response.status_code = 403
+                    return response
+        entries = fetch_entries(current_user_email)
+        user_entries = [entry for entry in entries if entry[0] == entry_id]
         
         if len(user_entries)==0:
             abort(400)
 
-        if user_entries[0] == entry_id:
-            for entry in user_entries:
-                update_entry(entry_id, title, content)
+        update_entry(entry_id, title, content)
 
-            return jsonify({}), 201
+        return jsonify({'message':'updated'}), 201
 
     @app.route('/api/v1/entries/<int:entry_id>/', methods=['DELETE'])
     @auth_token
     def delete_entry(entry_id, current_user_email):
         """api endpoint to delete a single entry"""
-        entry = fetch_entries(current_user_email)
-        if not entry:
+        entries = fetch_entries(current_user_email)
+        if not entries:
             abort(400)
 
-        if entry[0][0] == entry_id:
-            delete_entry(entry_id)
+        user_entries = [entry for entry in entries if entry[0] == entry_id]
+        if len(user_entries) == 0:
+            abort(400)
+        delete_entry()
 
         return jsonify({'result': 'item deleted'}), 202
 
