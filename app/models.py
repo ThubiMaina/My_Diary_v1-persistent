@@ -72,7 +72,7 @@ class User:
 
 class DiaryEntries:
     """docstring for DiaryEntries"""
-    def __init__(self, owner, title ,content):
+    def __init__(self, owner='', title='' ,content=''):
         self.owner = owner
         self.title = title
         self.content = content
@@ -109,30 +109,32 @@ class DiaryEntries:
 
     
 
-def delete_entry():
-    """ delete an entry by  using the entry_id """
-    conn = None
+    def delete_entry(self, entry_id):
+        """ delete an entry by  using the entry_id """
+        conn = None
 
 
-    try:
-        # read database configuration
-        params = config()
-        # connect to the PostgreSQL database
-        conn = psycopg2.connect(**params)
-        # create a new cursor
-        cur = conn.cursor()
-        # execute the UPDATE  statement
-        query = "DELETE FROM diary_entries WHERE diary_id = ('%s')"
-        cur.execute(query, [entry_id])
-        # Commit the changes to the database
-        conn.commit()
-        # Close communication with the PostgreSQL database
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
+        try:
+            # read database configuration
+            params = config()
+            # # connect to the PostgreSQL database
+            conn = psycopg2.connect(**params)
+            # # create a new cursor
+            cur = conn.cursor()
+            # # execute the UPDATE  statement
+            query = "DELETE FROM diary_entries WHERE diary_id = ('%s')"
+            cur.execute(query, [entry_id])
+            # # Commit the changes to the database
+            conn.commit()
+            # Close communication with the PostgreSQL database
+            # cur.close()
+            return True
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+            return str(error)
+        finally:
+            if conn is not None:
+                conn.close()
 
 def fetch_entries(current_user_email):
     """ query entries from the diary entries table """
