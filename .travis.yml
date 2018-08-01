@@ -22,7 +22,7 @@ install:
 
 before_script:
 
-  - psql -c 'CREATE DATABASE flask-api;' -U postgres
+  - psql -c 'CREATE DATABASE flask_api;' -U postgres
 
 # start test
 
