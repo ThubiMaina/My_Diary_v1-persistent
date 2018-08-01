@@ -1,0 +1,38 @@
+# .travis.yml 
+
+
+
+# for auto testing
+
+
+
+language: python
+
+python:
+
+  - "3.4"
+
+# dependencies installation
+
+install:
+
+  - pip install -r requirements.txt
+
+# add environment variable
+
+before_script:
+
+
+  - psql -c 'CREATE DATABASE diary_testing;' -U postgres
+
+# start test
+
+script:
+
+  - py.test --cov=app
+
+# send info to coveralls
+
+after_success:
+
+   coveralls
