@@ -21,7 +21,7 @@ class User:
             payload = {
             'iss': "mydiary",
             'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(minutes=30),
+            'exp': datetime.utcnow() + timedelta(minutes=600),
             'sub': email
             }
             jwt_string = jwt.encode(payload,
@@ -109,33 +109,30 @@ class DiaryEntries:
 
     
 
-    def delete_entry(self):
-        """ delete an entry by  using the entry_id """
-        conn = None
+def delete_entry():
+    """ delete an entry by  using the entry_id """
+    conn = None
 
-        rows_deleted = 0
-        try:
-            # read database configuration
-            params = config()
-            # connect to the PostgreSQL database
-            conn = psycopg2.connect(**params)
-            # create a new cursor
-            cur = conn.cursor()
-            # execute the UPDATE  statement
-            cur.execute("DELETE FROM diary_entries WHERE diary_id = %s", (self.entry_id,))
-            # get the number of updated rows
-            rows_deleted = cur.rowcount
-            # Commit the changes to the database
-            conn.commit()
-            # Close communication with the PostgreSQL database
-            cur.close()
-        except (Exception, psycopg2.DatabaseError) as error:
-            print(error)
-        finally:
-            if conn is not None:
-                conn.close()
-     
-        return rows_deleted
+
+    try:
+        # read database configuration
+        params = config()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the UPDATE  statement
+        query = "DELETE FROM diary_entries WHERE diary_id = ('%s')"
+        cur.execute(query, [entry_id])
+        # Commit the changes to the database
+        conn.commit()
+        # Close communication with the PostgreSQL database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
 
 def fetch_entries(current_user_email):
     """ query entries from the diary entries table """
@@ -187,8 +184,8 @@ def get_user(email):
 def update_entry( entry_id,title, content):
         """ update the title of an entry using id """
         sql = """ UPDATE diary_entries
-                    SET title = ("%s"), content = ('%s')
-                    WHERE diary_id = ('%s')"""
+                    SET title = %s, content = %s
+                    WHERE diary_id = %s"""
         conn = None
         updated_rows = 0
         try:
