@@ -1,4 +1,4 @@
-# app/__init__.py
+
 import re
 from datetime import datetime
 from flask_api import FlaskAPI
@@ -284,13 +284,16 @@ def create_app(config_name):
         entries = fetch_entries(current_user_email)
         if not entries:
             abort(400)
-
+        print(entries)
         user_entries = [entry for entry in entries if entry[0] == entry_id]
-        if len(user_entries) == 0:
-            abort(400)
-        delete_entry()
 
-        return jsonify({'result': 'item deleted'}), 202
+        # if len(user_entries) == 0:
+        #     abort(400)
+        diary_entry = DiaryEntries()
+        deleted = diary_entry.delete_entry(entry_id)
+        # print(ent)
+
+        return jsonify({'result': deleted}), 204
 
     return app
 
