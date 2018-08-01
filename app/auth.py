@@ -16,7 +16,7 @@ def auth_token(func):
                 if not token:
                     # If there's no token provided
                     response = {
-                        "error": "login required "
+                        "error": "login required"
                     }
                     return make_response(jsonify(response)), 401
 
