@@ -188,11 +188,6 @@ def create_app(config_name):
                     'field cannot start with spaces'})
                     response.status_code = 403
                     return response
-        # entries = fetch_entries(current_user_email)
-        # entries_user = [entry for entry in entries if entry[3] == owner]
-        # for title in entries_user:
-        #     if title[1] == 'title':
-        #         abort(400)
         Entry = {
             'owner': owner,
             'title': title,
