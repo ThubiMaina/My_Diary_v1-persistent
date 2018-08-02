@@ -84,7 +84,6 @@ class EntryTestCase(unittest.TestCase):
                                 headers={'Content-Type': 'application/json',
                          'Authorization': access_token})
         self.assertEqual(result.status_code, 404)
-        self.assertIn('provide the title for the entry', result.data.decode('utf-8'))
 
     def test_empty_post_entries(self):
         """Test bad request on post method"""
