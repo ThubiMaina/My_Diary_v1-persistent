@@ -11,6 +11,8 @@ currentdir = os.path.dirname(
 parentdir = os.path.dirname(currentdir)
 
 sys.path.insert(0, parentdir)
+
+
 from app.app import create_app
 
 class EntryTestCase(unittest.TestCase):
@@ -23,176 +25,115 @@ class EntryTestCase(unittest.TestCase):
                     "owner": "erick",
                     "title": "A day in space"
                 }))
-        self.login_data = json.dumps(dict({
-            "email": "erick@gmail.com",
-            "password": "password"
-        }))
-        self.register_data = json.dumps(dict({
-            "username":"erick",
-            "email":"erick@gmail.com",
-            "password":"password"
-            }))
-
-    def register_user(self, username="erick", email="erick@gmail.com", password="password"):
-        """register method to be called in tests"""
-        user_data = {
-            "username": username,
-            "email": email,
-            "Password": password
-        }
+    def register_user(self, email="erick@gmail.com", username="erick",
+                      password="password"):
+        """This helper method helps register a test user."""
+        user_data = {'email': email, 'username': username,
+                     'password': password}
         return self.app.post(
-            '/api/auth/register',
-            data=json.dumps(user_data),
-            content_type="application/json")
+                '/api/auth/register/',
+                headers={'Content-Type': 'application/json'},
+                data=json.dumps(user_data)
+               )
 
     def login_user(self, email="erick@gmail.com", password="password"):
-        """ login method"""
-        data = {"email": email, "Password": password}
-        return self.app.post(
-            '/api/auth/login',
-            data=json.dumps(data),
-            content_type="application/json")
+        """This helper method helps log in a test user."""
+        user_data = {'email': email, 'password': password}
+        result =  self.app.post(
+                '/api/auth/login/',
+                headers={'Content-Type': 'application/json'},
+                data=json.dumps(user_data)
+               )
+        access_token = json.loads(result.data.decode())['access_token']
+        return access_token
 
-    def create_entry(self, owner="erick", title="a good day in space"):
+    def create(self, title="Visit kenya",
+        content="Eat lots of nyama choma"):
         """This helper method helps register a test user."""
-        diary_data = {'owner': owner, 'title': title}
-        return self.app.post(
-                '/api/v1/entries/',
-                content_type="application/json",
-                data=json.dumps(diary_data))
+        self.register_user()
+        access_token = self.login_user()
+        diary_data = { 'title': title, 'content':content}
+        result = self.app.post("/api/v1/entries/", 
+                                data=diary_data,
+                                headers={'Content-Type': 'application/json',
+                         'Authorization': access_token})
+        return result
 
-    def test_diary_entry_creation(self):
-        """
-        Test a diary entry creation 
-        """
-        result = self.app.post("/api/v1/entries/", data=self.entry_data,
-                                    content_type="application/json")
-        self.assertEqual(result.status_code, 201)
+    # def test_diary_entry(self):
+    #     """
+    #     Test a diary entry
+    #     """
+    #     self.register_user()
+    #     access_token = self.login_user()
+    #     self.create()
+    #     # access_token = json.loads(result.data.decode())['access_token']
+    #     result = self.app.post("/api/v1/entries/", 
+    #                             data=self.entry_data,
+    #                             headers={'Content-Type': 'application/json',
+    #                      'Authorization': access_token})
+    #     res = json.loads(result.data.decode())
+    #     self.assertEqual(result.status_code, 201)
+    #     self.assertEqual(res['message'], "entry created")
 
-    def test_bad_request_post_entries(self):
+
+    def test_get_empty_entries(self):
+        """Test API to get entries (GET request)."""
+        self.register_user()
+        access_token = self.login_user()
+        result = self.app.get("/api/v1/entries/", 
+                                headers={'Content-Type': 'application/json',
+                         'Authorization': access_token})
+        self.assertEqual(result.status_code, 404)
+
+    def test_empty_post_entries(self):
         """Test bad request on post method"""
         self.register_user()
-        login = self.login_user()
-        #entries
-        empty_data = self.app.post(
-            'api/v1/user/entries',
-            data={},
-            content_type="application/json",
-                )
-        self.assertEqual(empty_data.status_code, 400)
+        access_token = self.login_user()
+        empty = self.app.post("/api/v1/entries/", data={},
+                                    headers={'Content-Type': 'application/json',
+                         'Authorization': access_token})
 
+        self.assertEqual(empty.status_code, 400)
 
-    def test_create_entry_without_owner(self):
-        """
-        Test the creation of a diary entry through the API via 
-        POST without owner field
-        """
-        result = self.app.post('/api/v1/user/entries/', 
-                    data={       
-                    "owner": "",
-                    "title": "A day in space"
-                                        },
-                    content_type="application/json")
-        self.assertEqual(result.status_code, 403)
+    def test_invalid_access_token(self):
+        """Test API can check for a valid access token"""
+        self.register_user()
+        result = self.login_user()
+        access_token = "deyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlcmlja0BnbWFpbC5jb20iLCJleHAiOjE1MzI3ODkwNzAsImlzcyI6Im15ZGlhcnkiLCJpYXQiOjE1MzI3ODcyNzB9.m6kLmdUqf4XLq7TIkb97HCCSjIZLJ8kvmwaOah1BClU"
+        post_data = self.app.post("/api/v1/entries/", data={'owner':'erick',
+                        'title' :'go to the park'},
+                          headers={'Content-Type': 'application/json',
+                         'Authorization': access_token})
+        result = json.loads(post_data.data.decode())
+        self.assertEqual(post_data.status_code, 401)
+        self.assertEqual(result['error'], "Invalid token. Please register or login")
 
-    def test_create_entry_without_title(self):
-        """
-        Test the creation of a diary entry through the API via 
-        POST without the title 
-        """
-        result = self.app.post('/api/v1/user/entries/', 
-             data={       
-                    "owner": "erick",
-                    "title": ""
-                                        },content_type="application/json")
-        self.assertEqual(result.status_code, 403)
-
-    def test_get_all_entries(self):
-        """Test API to get  diary entries (GET request)."""
-        result = self.app.post('/api/v1/user/entries/',
-                                    content_type="application/json",
-                                    data=self.entry_data)
-        self.assertEqual(result.status_code, 201)
-        results = self.app.get('/api/v1/user/entries/', 
-            content_type="application/json")
-        self.assertEqual(results.status_code, 200)
-        self.assertIn('A day in space', result.data.decode('utf-8'))
-
-    def test_get_entries_by_id(self):
-        """Test API to get  user entries by the id (GET request)."""
-        result = self.app.post('/api/v1/user/entries/',
-                                    content_type="application/json",
-                                    data=self.entry_data)
-        self.assertEqual(result.status_code, 201)
-        result = self.app.get('/api/v1/user/entries/1/',
-                                    content_type="application/json",)
-        self.assertEqual(result.status_code, 200)
-
-    def test_get_entry_invalid_id(self):
-        """Test API to get a non existing diary entry """
-        result = self.app.post('/api/v1/user/entries/',
-                                    content_type="application/json",
-                                    data=self.entry_data)
-        self.assertEqual(result.status_code, 201)
-        result = self.app.get('/api/v1/user/entries/4/',
-                                     content_type="application/json")
-        self.assertEqual(result.status_code, 404)
-
-    def test_api_update_entry_with_id(self):
-        """Test API url [PUT] api/user/entries"""
-
-        #create entries
-        response = self.app.post(
-            '/api/v1/user/entries/',
-            data= self.entry_data,
-            content_type="application/json")
-        self.assertEqual(response.status_code, 201)
-        #update entries
-        response = self.app.put(
-            '/api/v1/user/entries/1/',
-            data=json.dumps({
-                "owner": "erick",
-                "title": "A day and a walk in the park"
-            },content_type="application/json"))
-        self.assertEqual(response.status_code, 201)
-
-    def test_edit_a_non_existing_entry(self):
-        """Test API to edit a non existing entry """
-        result = self.app.post('/api/v1/user/entries/', 
-                                content_type="application/json", 
-                                data=self.entry_data)
-        self.assertEqual(result.status_code, 201)
-        result = self.app.put('/api/v1/user/entries/33/',
-                            data=json.dumps({
-                            "owner": "erick",
-                            "title": "A day and a walk in the park"
-            },content_type="application/json"))
-        self.assertEqual(result.status_code, 404)
-
-    def test_delete_entry(self):
-        """Test API to delete a diary entry by user (DELETE request)"""
-        result = self.app.post('api/v1/user/entries/', 
-                                content_type="application/json", 
-                                data=self.entry_data)
-        self.assertEqual(result.status_code, 201)
-        #delete entry
-        res = self.app.delete('api/v1/user/entries/1/', 
-                                content_type="application/json")
-        self.assertEqual(res.status_code, 200)
-        #test get after delete
-        result = self.app.get('api/v1/user/entries/1/', 
-                                    content_type="application/json")
-        self.assertEqual(result.status_code, 404)
-
-    def test_delete_entry_with_invalid_id(self):
-        """Test delete if id does not exist """
-        result = self.app.post('api/v1/user/entries/', 
-                                        content_type="application/json", 
-                                        data=self.entry_data)
-        self.assertEqual(result.status_code, 201)
-        result = self.app.delete('api/v1/user/entries/33/', 
-                                        content_type="application/json")
-        self.assertEqual(result.status_code, 404)
+    def test_empty_access_token(self):
+        """Test API can check for an empty access token"""
+        self.register_user()
+        result = self.login_user()
+        access_token = ""
+        post_data = self.app.post("/api/v1/entries/", data={'owner':'erick',
+                        'title' :'go to the park'},
+                          headers={'Content-Type': 'application/json',
+                         'Authorization': access_token})
+        result = json.loads(post_data.data.decode())
+        self.assertEqual(post_data.status_code, 401)
+        self.assertEqual(result['error'], "login required")
         
+
+    def test_entry_without_title(self):
+        """Test if an entry can be created without a title"""
+        entry_res = self.create( "", "content added here")
+        self.assertEqual(entry_res.status_code, 400)
+
+    def test_if_entry_exists(self):
+        """Test that a user cannot create an entry twice"""
+        self.create("a walk in the park", "some content")
+        second_res = self.create("a walk in the park", "some content")
+        self.assertEqual(second_res.status_code, 400)
+
+
+
 if __name__ == "__main__":
     unittest.main()

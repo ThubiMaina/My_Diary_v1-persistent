@@ -14,7 +14,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     """Configurations for Testing, with a separate test database."""
     TESTING = True
-    DATABASE_URL = 'postgresql://localhost/test_db'
+    DATABASE_URL = 'postgresql://postgres:erick@localhost:5432/flask_api'
     DEBUG = True
 
 class StagingConfig(Config):
