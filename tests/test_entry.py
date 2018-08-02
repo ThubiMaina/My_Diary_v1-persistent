@@ -76,28 +76,25 @@ class EntryTestCase(unittest.TestCase):
         self.assertEqual(res['message'], "entry created")
 
 
-    
-    # def test_get_all_entries(self):
-    #     """Test API to get entries (GET request)."""
-    #     self.register_user()
-    #     result = self.login_user()
-    #     access_token = json.loads(result.data.decode())['access_token']
-    #     result = self.app.get("/api/v1/entries/", 
-    #                             headers={'Content-Type': 'application/json',
-    #                      'Authorization': access_token})
-    #     self.assertEqual(result.status_code, 200)
-    #     self.assertIn('A day at game', result.data.decode('utf-8'))
+    def test_get_empty_entries(self):
+        """Test API to get entries (GET request)."""
+        self.register_user()
+        access_token = self.login_user()
+        result = self.app.get("/api/v1/entries/", 
+                                headers={'Content-Type': 'application/json',
+                         'Authorization': access_token})
+        self.assertEqual(result.status_code, 404)
+        self.assertIn('provide the title for the entry', result.data.decode('utf-8'))
 
-    # def test_empty_post_entries(self):
-    #     """Test bad request on post method"""
-    #     self.register_user()
-    #     result = self.login_user()
-    #     access_token = json.loads(result.data.decode())['access_token']
-    #     empty = self.app.post("/api/v1/entries/", data={},
-    #                                 headers={'Content-Type': 'application/json',
-    #                      'Authorization': access_token})
+    def test_empty_post_entries(self):
+        """Test bad request on post method"""
+        self.register_user()
+        access_token = self.login_user()
+        empty = self.app.post("/api/v1/entries/", data={},
+                                    headers={'Content-Type': 'application/json',
+                         'Authorization': access_token})
 
-    #     self.assertEqual(empty.status_code, 400)
+        self.assertEqual(empty.status_code, 400)
 
     def test_invalid_access_token(self):
         """Test API can check for a valid access token"""
