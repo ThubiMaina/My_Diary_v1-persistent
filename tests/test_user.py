@@ -58,7 +58,7 @@ class UserTestCase(unittest.TestCase):
         }))
         result = self.app.post("/api/auth/register/", data = test_data,
                                     content_type="application/json")
-        self.assertEqual(result.status_code, 400)
+        self.assertEqual(result.status_code, 401)
 
     def test_registration_without_user_password(self):
         """
@@ -72,7 +72,7 @@ class UserTestCase(unittest.TestCase):
         result = self.app.post("/api/auth/register/", data=test_data,
                                     content_type="application/json")
 
-        self.assertEqual(result.status_code, 400)
+        self.assertEqual(result.status_code, 401)
 
     def test_registration_with_spaces_as_password(self):
         """
@@ -112,7 +112,7 @@ class UserTestCase(unittest.TestCase):
         result = self.app.post("/api/auth/register/", data=test_data,
                                     content_type="application/json")
 
-        self.assertEqual(result.status_code, 400)
+        self.assertEqual(result.status_code, 401)
 
     def test_registration_with_special_characters(self):
         """test that user name cannot contain special characters eg @#
@@ -178,17 +178,13 @@ class UserTestCase(unittest.TestCase):
         """Test registered user can login with a blank email."""
         self.register_user("user@mail.com", "testuser", "testpass")
         login_res = self.login_user("", "testpass")
-        result = json.loads(login_res.data.decode())
-        self.assertEqual(result['error'], "email field cannot be blank")
-        self.assertEqual(login_res.status_code, 400)
+        self.assertEqual(login_res.status_code, 401)
 
     def test_login_blank_password(self):
         """Test registered user can login with a blank email."""
         self.register_user("user@mail.com", "testuser", "testpass")
         login_res = self.login_user("user@mail", "")
-        result = json.loads(login_res.data.decode())
-        self.assertEqual(result['error'], "password field has to be filled")
-        self.assertEqual(login_res.status_code, 400)
+        self.assertEqual(login_res.status_code, 401)
 
     def test_login_with_spaces_as_password(self):
         """Test registered user can login with a blank email."""
