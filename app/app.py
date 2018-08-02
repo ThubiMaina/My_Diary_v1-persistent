@@ -2,19 +2,25 @@
 import re
 from datetime import datetime
 from flask_api import FlaskAPI
-from flask import request, jsonify, abort
+from flask import request, jsonify
 from app import models
 from .models import *
 from app.auth import auth_token
+from flask_cors import CORS
+
+
 
 # local import
 from instance.config import app_config
+
 
 def create_app(config_name):
     app = FlaskAPI(__name__, instance_relative_config=True)
     app.config.from_object(app_config["development"])
     app.config.from_pyfile('config.py')
     app.url_map.strict_slashes = False
+    CORS(app)
+
 
     @app.route('/api/auth/register/', methods=['POST'])
     def create_user():
@@ -26,6 +32,10 @@ def create_app(config_name):
             password = data.get('password')
             admin = data.pop('admin', False)
             regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+
+            if not email or not password or not username:
+                return jsonify({"message": "Check your details and try again"}), 401
+
             if email == "":
                 response = jsonify({'error': 'email field cannot be blank'})
                 response.status_code = 400
@@ -43,7 +53,7 @@ def create_app(config_name):
                 response.status_code = 400
                 return response
 
-            if username:
+            if username: 
                 stripped_name = username.strip()
                 if len(stripped_name) == 0:
                     response = jsonify({'error':
@@ -100,6 +110,10 @@ def create_app(config_name):
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
+
+        if not email or not password:
+            return jsonify({"message": "Check your details and try again"}), 401
+
         if email == "":
             response = jsonify({'error': 'email field cannot be blank'})
             response.status_code = 400
@@ -144,15 +158,10 @@ def create_app(config_name):
 
     @app.errorhandler(404)
     def page_not_found(e):
-        response = jsonify({'error': 'not found'})
+        response = jsonify({'error': 'not found check url again'})
         response.status_code = 404
         return response
 
-    @app.errorhandler(500)
-    def server_error(e):
-        response = jsonify({'error': 'Internal server error'})
-        response.status_code = 500
-        return response
 
     @app.route('/api/v1/entries/', methods=['POST'])
     @auth_token
@@ -162,6 +171,9 @@ def create_app(config_name):
         owner = current_user_email
         title = data.get('title')
         content = data.get('content')
+
+        if not title or not content:
+            return jsonify({"message": "Check your details and try again"}), 401
 
         if title == "":
             response = jsonify({'error': 'provide the title for the entry'})
@@ -189,6 +201,12 @@ def create_app(config_name):
                     'field cannot start with spaces'})
                     response.status_code = 403
                     return response
+        entries = fetch_entries(current_user_email)
+        for entry in entries:
+            if entry[1] == title:
+                print(entry[1])
+                return jsonify({"message": "That entry exists"}), 409
+
         Entry = {
             'owner': owner,
             'title': title,
@@ -208,7 +226,7 @@ def create_app(config_name):
         entries = fetch_entries(current_user_email)
 
         if not entries:
-            abort(400)
+            return jsonify({"message": "You dont have any entries"}), 404
 
         for diary_entry in entries:
             DiaryList.append({'date': datetime.utcnow(),
@@ -225,10 +243,15 @@ def create_app(config_name):
         """api endpoint to get a single diary entry"""
         entries = fetch_entries(current_user_email)
 
+        # if not re.match("^[0-9]+$", entry_id):
+        #     return jsonify({"message": "id should be an integer"}), 404
+
+
         entries_user = [entry for entry in entries if entry[0] == entry_id]
 
         if len(entries_user) == 0:
-            abort(400)
+            return jsonify({"message": "you dont have such an entry"}), 404
+
         return jsonify({
             
             "entry":entries_user
@@ -242,6 +265,8 @@ def create_app(config_name):
         data = request.get_json()
         title = data.get('title')
         content = data.get('content')
+        if not title or not content:
+            return jsonify({"message": "Check your details and try again"}), 401
         if title == "":
             response = jsonify({'error': 'provide the title for the entry'})
             response.status_code = 400
@@ -272,7 +297,7 @@ def create_app(config_name):
         user_entries = [entry for entry in entries if entry[0] == entry_id]
         
         if len(user_entries)==0:
-            abort(400)
+            return jsonify({'message':'does not exist'}), 404
 
         update_entry(entry_id, title, content)
 
@@ -284,17 +309,14 @@ def create_app(config_name):
         """api endpoint to delete a single entry"""
         entries = fetch_entries(current_user_email)
         if not entries:
-            abort(400)
-        print(entries)
+            return jsonify({'message':'you dont have any entries'}), 404
         user_entries = [entry for entry in entries if entry[0] == entry_id]
-
-        # if len(user_entries) == 0:
-        #     abort(400)
+        if len(user_entries)==0:
+            return jsonify({'message':'does not exist'}), 404
         diary_entry = DiaryEntries()
         deleted = diary_entry.delete_entry(entry_id)
-        # print(ent)
-
-        return jsonify({'result': deleted}), 204
+        
+        return jsonify({"message": "item deleted"}), 200
 
     return app
 
