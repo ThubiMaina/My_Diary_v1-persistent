@@ -1,5 +1,7 @@
 # My-Online-Diary
 ___
+[![Build Status](https://travis-ci.org/ThubiMaina/My_Diary_v1-persistent.svg?branch=diary-v1)](https://travis-ci.org/ThubiMaina/My_Diary_v1-persistent)
+
 ![diary](https://user-images.githubusercontent.com/31989539/42674910-477c815c-867a-11e8-9241-3c76d5978f7a.jpg)
 
 ___
@@ -74,8 +76,8 @@ To run tests on your terminal run
 | -------- | ------------- | --------- | -------------- |
 | /api/auth/v1/register | Creates a user account | POST | FALSE |
 | /api/auth/v1/login | Logs in a user | POST | TRUE |
-| /api/user/v1/entries  | Adds a new diary entry | POST | TRUE |
-| /api/user/v1/entries  | Gets all  diary entries for a user| GET | TRUE |
-| /api/user/v1/entries/<entry_id>  | Gets a single entry for a user| GET | TRUE |
-| /api/user/v1/entries/<entry_id> | Updates an entry | PUT | TRUE |
-|  /api/user/v1/entries/<entry_id> | Remove a diary entry | DELETE | TRUE |
+| /api/v1/entries  | Adds a new diary entry | POST | TRUE |
+| /api/v1/entries  | Gets all  diary entries for a user| GET | TRUE |
+| /api/v1/entries/<entry_id>  | Gets a single entry for a user| GET | TRUE |
+| /api/v1/entries/<entry_id> | Updates an entry | PUT | TRUE |
+|  /api/v1/entries/<entry_id> | Remove a diary entry | DELETE | TRUE |
