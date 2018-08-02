@@ -23,6 +23,8 @@ install:
 before_script:
 
   - psql -c 'CREATE DATABASE flask_api;' -U postgres
+  - psql -c "create user erick with password 'Tubezzzz35' createdb;" -U postgres
+
 
 # start test
 
