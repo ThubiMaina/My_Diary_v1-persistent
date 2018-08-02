@@ -59,21 +59,21 @@ class EntryTestCase(unittest.TestCase):
                          'Authorization': access_token})
         return result
 
-    def test_diary_entry(self):
-        """
-        Test a diary entry
-        """
-        self.register_user()
-        access_token = self.login_user()
-        self.create()
-        # access_token = json.loads(result.data.decode())['access_token']
-        result = self.app.post("/api/v1/entries/", 
-                                data=self.entry_data,
-                                headers={'Content-Type': 'application/json',
-                         'Authorization': access_token})
-        res = json.loads(result.data.decode())
-        self.assertEqual(result.status_code, 201)
-        self.assertEqual(res['message'], "entry created")
+    # def test_diary_entry(self):
+    #     """
+    #     Test a diary entry
+    #     """
+    #     self.register_user()
+    #     access_token = self.login_user()
+    #     self.create()
+    #     # access_token = json.loads(result.data.decode())['access_token']
+    #     result = self.app.post("/api/v1/entries/", 
+    #                             data=self.entry_data,
+    #                             headers={'Content-Type': 'application/json',
+    #                      'Authorization': access_token})
+    #     res = json.loads(result.data.decode())
+    #     self.assertEqual(result.status_code, 201)
+    #     self.assertEqual(res['message'], "entry created")
 
 
     def test_get_empty_entries(self):
@@ -84,7 +84,6 @@ class EntryTestCase(unittest.TestCase):
                                 headers={'Content-Type': 'application/json',
                          'Authorization': access_token})
         self.assertEqual(result.status_code, 404)
-    
 
     def test_empty_post_entries(self):
         """Test bad request on post method"""
